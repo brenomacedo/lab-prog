@@ -1,10 +1,46 @@
 #include <string>
 #include <iostream>
+#include <random>
 
-int* KMP_substr(const std::string& text, const std::string& pattern) {
+std::random_device device;
+std::mt19937 generator(device());
+
+char gerarCaractere(char c) {
+  std::uniform_int_distribution distribution('a', c);
+  return distribution(generator);
+}
+
+void gerarInstanciaAleatoria(char* texto, size_t tamanhoTexto, char* padrao, size_t tamanhoPadrao, char c) {
+  for (int i = 0; i < tamanhoTexto; i++) {
+    texto[i] = gerarCaractere(c);
+  }
+
+  for (int i = 0; i < tamanhoPadrao; i++) {
+    padrao[i] = gerarCaractere(c);
+  }
+}
+
+void gerarInstanciaDePiorCaso(char* texto, size_t tamanhoTexto, char* padrao, size_t tamanhoPadrao) {
+  for (int i = 0; i < tamanhoTexto; i++) {
+    texto[i] = 'a';
+  }
+
+  for (int i = 0; i < tamanhoPadrao; i++) {
+    padrao[i] = 'a';
+  }
+}
+
+int str_len(const char* str) {
+  int i = 0;
+  while (true) {
+    if (str[i] == '\0') return i;
+    i++;
+  }
+}
+
+void KMP_substr(const char* text, const char* pattern, int* resultado) {
   // computando o vetor de prefixos e sufixos
-  int patLen = pattern.length();
-  int txtLen = text.length();
+  int patLen = str_len(pattern);
   int* a = new int[patLen];
 
   int l = 0;
@@ -26,21 +62,21 @@ int* KMP_substr(const std::string& text, const std::string& pattern) {
   }
 
   int positionsCount = 0;
-  int* foundPositions = new int[txtLen - patLen];
+
   int j = 0;
   int k = 0;
 
-  while ((txtLen - j) >= (patLen - k)) {
+  while (text[j] != '\0') {
     if (pattern[k] == text[j]) {
       k++, j++;
     }
 
     if (k == patLen) {
-      foundPositions[positionsCount] = j - k;
+      resultado[positionsCount] = j - k;
       positionsCount++;
 
       k = a[k - 1];
-    } else if (j < txtLen && pattern[k] != text[j]) {
+    } else if (text[j] != '\0' && pattern[k] != text[j]) {
       if (k != 0) {
         k = a[k - 1];
       } else {
@@ -49,22 +85,17 @@ int* KMP_substr(const std::string& text, const std::string& pattern) {
     }
   }
 
-  foundPositions[positionsCount] = -1;
+  resultado[positionsCount] = -1;
 
   delete a;
-  return foundPositions;
 }
 
-int* substr(const std::string& text, const std::string& pattern) {
-  int txtLen = text.length();
-  int patLen = pattern.length();
-
-  int* foundPositions = new int[txtLen - patLen];
+void substr(const char* text, const char* pattern, int* result) {
   int positionsCount = 0;
 
-  for (int i = 0; i <= (txtLen - patLen); i++) {
+  for (int i = 0; text[i] != '\0'; i++) {
     bool equal = true;
-    for (int j = 0; j < patLen; j++) {
+    for (int j = 0; j < pattern[j] != '\0'; j++) {
       if (text[i + j] != pattern[j]) {
         equal = false;
         break;
@@ -72,23 +103,27 @@ int* substr(const std::string& text, const std::string& pattern) {
     }
     
     if (equal) {
-      foundPositions[positionsCount] = i;
+      result[positionsCount] = i;
       positionsCount++;
     }
   }
 
-  foundPositions[positionsCount] = -1;
-  return foundPositions;
+  result[positionsCount] = -1;
 }
 
-int main() {
-  std::string text = "brenomacedodebrito";
-  std::string pattern = "macedo";
+int main(int argc, char** argv) {
+  const char opt = argv[1][0];
 
-  int foundPatterns = text.length() - pattern.length() + 1;
-  int* fP = substr(text, pattern);
 
-  for (int i = 0; i < foundPatterns; i++) {
-    std::cout << fP[i] << std::endl;
+  if (opt == 'A') {
+    char letter = argv[2][0];
+    size_t tamPadr = std::stol(argv[3]);
+    size_t tamText = std::stol(argv[4]);  
+  } else if (opt == 'P') {
+    size_t tamPadr = std::stol(argv[2]);
+    size_t tamText = std::stol(argv[3]);
+  } else {
+    size_t x = std::stoi(argv[2]);
+    size_t y = std::stoi(argv[3]);
   }
 }
